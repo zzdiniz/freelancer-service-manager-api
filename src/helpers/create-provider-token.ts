@@ -4,7 +4,7 @@ import { Response } from "express";
 const createProviderToken = (providerEmail: string, res: Response) => {
   const token = sign(
     {
-      name: providerEmail,
+      email: providerEmail,
     },
     "secretSP"
   );

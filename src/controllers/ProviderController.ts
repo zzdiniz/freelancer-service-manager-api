@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { JwtPayload, verify } from "jsonwebtoken";
 import { genSalt, hash, compare } from "bcrypt";
 import Provider from "../models/Provider";
 import createProviderToken from "../helpers/create-provider-token";
