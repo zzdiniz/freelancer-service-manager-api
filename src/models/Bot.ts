@@ -18,9 +18,10 @@ export default class Bot implements BotInterface {
   }
 
   async insert() {
-    const sql = `INSERT INTO Bots (name,userName,link,token,providerId) VALUES ('${this.name}','${this.userName}','${this.link}','${this.token},'${this.providerId}')`;
+    const sql = 'INSERT INTO Bots (name, userName, link, token, providerId) VALUES (?, ?, ?, ?, ?)';
+    const values = [this.name, this.userName, this.link, this.token, this.providerId];
 
-    conn.query(sql, (err) => {
+    conn.query(sql, values, (err) => {
       if (err) {
         throw new Error(err.message);
       }
