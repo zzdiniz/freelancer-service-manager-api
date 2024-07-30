@@ -5,5 +5,6 @@ import verifyProviderToken from "../middlewares/verifyProviderToken";
 const router = Router()
 
 router.post('/create',verifyProviderToken,BotController.create)
+router.get('/get-by-username',BotController.getByUsername)
 
 export default router

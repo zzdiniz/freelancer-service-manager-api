@@ -69,4 +69,23 @@ export default class BotController {
       await browser.close();
     }
   }
+  static async getByUsername(req: Request, res: Response){
+    const { userName } = req.body
+
+    if(!userName){
+      return res.status(422).json({message: 'You must send an userName'})
+    }
+
+    try {
+      const bot = await Bot.getByUsername(userName)
+      if(!bot){
+        return res.status(404).json({message: `Unable to find bot with username: ${userName}`})
+      }
+
+      return res.status(200).json(bot)
+      
+    } catch (error) {
+      
+    } 
+  }
 }

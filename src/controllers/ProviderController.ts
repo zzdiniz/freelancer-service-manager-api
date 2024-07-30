@@ -44,7 +44,7 @@ export default class ProviderController {
     const provider = await Provider.getByEmail(email);
     if (!provider) {
       return res
-        .status(422)
+        .status(404)
         .json({ message: `There is no user with email '${email}'` });
     }
 
