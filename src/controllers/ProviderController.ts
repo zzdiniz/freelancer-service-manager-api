@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { genSalt, hash, compare } from "bcrypt";
 import Provider from "../models/Provider";
 import createProviderToken from "../helpers/create-provider-token";
+import ProviderInterface from "../types/ProviderInterface";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -53,5 +54,27 @@ export default class ProviderController {
     }
 
     return createProviderToken(provider.email, res);
+  }
+
+  static async addService(req: Request, res: Response) {
+    const provider = res.locals.provider as ProviderInterface;
+    const { name, description, price, faq } = req.body;
+
+    if (!name || !description || !price) {
+      return res.status(422).json({ message: "Missing required fields." });
+    }
+
+    try {
+      await Provider.addService({
+        name,
+        description,
+        price,
+        providerId: provider.id as number,
+        faq,
+      });
+      return res.status(201).json({ message: "Service added." });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
   }
 }
