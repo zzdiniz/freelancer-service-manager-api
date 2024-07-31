@@ -44,6 +44,21 @@ class Provider implements ProviderInterface {
       });
     });
   }
+
+  public static async getById(
+    id: number
+  ): Promise<ProviderInterface | undefined> {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM Providers WHERE id='${id}'`;
+      conn.query(query, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data.length > 0 ? data[0] : undefined);
+        }
+      });
+    });
+  }
 }
 
 export default Provider;
