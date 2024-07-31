@@ -1,4 +1,4 @@
-export default interface Service {
+export default interface ServiceInterface {
     id?:number;
     name: string;
     description: string;

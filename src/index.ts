@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import ProviderRoutes from "./routes/ProviderRoutes"
 import BotRoutes from "./routes/BotRoutes"
+import ServiceRoutes from "./routes/ServiceRoutes"
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use('/provider',ProviderRoutes)
 app.use('/bot',BotRoutes)
+app.use('/service', ServiceRoutes)
 
 app.listen(PORT, () => {
   console.log(`Listening to port ${PORT}`);

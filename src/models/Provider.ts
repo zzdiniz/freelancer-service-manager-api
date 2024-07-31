@@ -1,6 +1,5 @@
 import conn from "../db/conn";
 import ProviderInterface from "../types/ProviderInterface";
-import Service from "../types/Service";
 
 class Provider implements ProviderInterface {
   id?: number;
@@ -43,22 +42,6 @@ class Provider implements ProviderInterface {
           resolve(data.length > 0 ? data[0] : undefined);
         }
       });
-    });
-  }
-
-  public static async addService({
-    name,
-    description,
-    price,
-    providerId,
-    faq,
-  }: Service) {
-    const sql = `INSERT INTO Services (name, description, price, providerId, faq) VALUES (?, ?, ?, ?, ?)`;
-    const faqJSON = faq ? JSON.stringify(faq) : null;
-    conn.query(sql, [name, description, price, providerId, faqJSON], (err) => {
-      if (err) {
-        throw new Error(err.message);
-      }
     });
   }
 }
