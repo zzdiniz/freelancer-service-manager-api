@@ -50,4 +50,19 @@ export default class Service implements ServiceInterface {
       });
     });
   }
+
+  public static async getByServiceId(
+    id: number
+  ): Promise<ServiceInterface | undefined> {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM Services WHERE id='${id}'`;
+      conn.query(query, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data.length > 0 ? data[0] : undefined);
+        }
+      });
+    });
+  }
 }
