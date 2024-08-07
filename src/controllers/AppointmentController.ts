@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import Appointment from "../models/Appointment";
 import parseToDatetime from "../helpers/parse-to-datetime";
+import parseToLocalDate from "../helpers/parse-to-local-date";
+import compareDates from "../helpers/compare-dates";
 
 export default class AppointmentController {
   static async addAppointment(req: Request, res: Response) {
@@ -14,24 +16,13 @@ export default class AppointmentController {
       const scheduledAppointments = await Appointment.getByProviderId(
         providerId
       );
-
-      if (scheduledAppointments) {
-        for (const scheduledAppointment of scheduledAppointments) {
-          const date = new Date(scheduledAppointment.datetime);
-          date.setHours(date.getHours() - 6);
-          const [scheduledDate, scheduledTime] = date.toISOString().split("T");
-          const [year, month, day] = scheduledDate.split("-");
-          const [hour, minute, second] = scheduledTime.split(":");
-          const parsedScheduledDate = `${[day, month, year].join("/")} ${[
-            hour,
-            minute,
-          ].join(":")}`;
-
-          if (parsedScheduledDate === datetime) {
-            return res.status(409).json({ message: "Date already occupied" });
-          }
-        }
+      const conflictingDate = scheduledAppointments && scheduledAppointments.find((appointment)=>{
+        return compareDates(parseToDatetime(datetime),appointment.datetime)
+      })
+      if(conflictingDate){
+        return res.status(409).json({ message: `${parseToLocalDate(conflictingDate.datetime)} already occupied` });
       }
+
       const appointment = new Appointment({
         datetime: parseToDatetime(datetime),
         status: "scheduled",
