@@ -61,4 +61,31 @@ export default class Bot implements BotInterface {
       });
     });
   }
+
+  static async getById(id: number): Promise<Bot | null> {
+    const sql = "SELECT * FROM Bots WHERE id = ?";
+
+    return new Promise((resolve, reject) => {
+      conn.query(sql, [id], (err, results) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+
+        if (results.length > 0) {
+          const botData = results[0];
+          const bot = new Bot({
+            id: botData.id,
+            name: botData.name,
+            userName: botData.userName,
+            link: botData.link,
+            token: botData.token,
+            providerId: botData.providerId,
+          });
+          resolve(bot);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
 }

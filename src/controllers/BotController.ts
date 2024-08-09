@@ -69,6 +69,7 @@ export default class BotController {
       await browser.close();
     }
   }
+
   static async getByUsername(req: Request, res: Response){
     const { userName } = req.body
 
@@ -86,6 +87,26 @@ export default class BotController {
       
     } catch (error) {
       
+    } 
+  }
+
+  static async getById(req: Request, res: Response){
+    const { id } = req.params
+
+    if(!id){
+      return res.status(422).json({message: 'You must send an id'})
+    }
+
+    try {
+      const bot = await Bot.getById(parseInt(id))
+      if(!bot){
+        return res.status(404).json({message: `Unable to find bot with id: ${id}`})
+      }
+
+      return res.status(200).json(bot)
+      
+    } catch (error) {
+      return res.status(500).json({message: error})
     } 
   }
 }
