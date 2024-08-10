@@ -37,9 +37,9 @@ export default class ClientController {
     }
   }
   static async createConversation(req: Request, res: Response) {
-    const { providerId, clientId} = req.body;
+    const { providerId, clientId } = req.body;
 
-    if (!providerId || !clientId ) {
+    if (!providerId || !clientId) {
       return res.status(422).json({ message: "Missing required fields" });
     }
     try {
@@ -47,11 +47,15 @@ export default class ClientController {
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
-      const provider = await Provider.getById(parseInt(providerId))
+      const provider = await Provider.getById(parseInt(providerId));
       if (!provider) {
         return res.status(404).json({ message: "Provider not found" });
       }
-      await Client.createConversation({providerId,clientId,conversationState:"initial_message"})
+      await Client.createConversation({
+        providerId,
+        clientId,
+        conversationState: "initial_message",
+      });
       return res.status(200).json({ message: "Created" });
     } catch (error) {
       return res.status(500).json({ message: error });
@@ -68,25 +72,32 @@ export default class ClientController {
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
-      const provider = await Provider.getById(parseInt(providerId))
+      const provider = await Provider.getById(parseInt(providerId));
       if (!provider) {
         return res.status(404).json({ message: "Provider not found" });
       }
-      await Client.updateConversation({providerId,clientId,conversationState})
+      await Client.updateConversation({
+        providerId,
+        clientId,
+        conversationState,
+      });
       return res.status(200).json({ message: "Updated" });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
   }
   static async getConversation(req: Request, res: Response) {
-    const { providerId, clientId} = req.body;
+    const { providerId, clientId } = req.query;
 
-    if (!providerId || !clientId ) {
+    if (!providerId || !clientId) {
       return res.status(422).json({ message: "Missing required fields" });
     }
 
     try {
-      const conversation = await Client.getConversation(parseInt(providerId),parseInt(clientId));
+      const conversation = await Client.getConversation(
+        parseInt(providerId as string),
+        parseInt(clientId as string)
+      );
 
       if (!conversation) {
         return res.status(404).json({ message: "Conversation not found" });
