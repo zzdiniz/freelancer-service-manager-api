@@ -6,9 +6,14 @@ import compareDates from "../helpers/compare-dates";
 
 export default class AppointmentController {
   static async addAppointment(req: Request, res: Response) {
-    const { datetime, providerId, serviceId, clientId } = req.body;
+    const { datetime, providerId, serviceId, clientId, status } = req.body;
 
-    if (!datetime || !providerId || !serviceId || !clientId) {
+    if (
+      !datetime ||
+      !providerId ||
+      (!serviceId && status !== "unavailable") ||
+      (!clientId && status !== "unavailable")
+    ) {
       return res.status(422).json({ message: "Missing required fields" });
     }
 
@@ -16,16 +21,24 @@ export default class AppointmentController {
       const scheduledAppointments = await Appointment.getByProviderId(
         providerId
       );
-      const conflictingDate = scheduledAppointments && scheduledAppointments.find((appointment)=>{
-        return compareDates(parseToDatetime(datetime),appointment.datetime)
-      })
-      if(conflictingDate){
-        return res.status(409).json({ message: `${parseToLocalDate(conflictingDate.datetime)} already occupied` });
+      const conflictingDate =
+        scheduledAppointments &&
+        scheduledAppointments.find((appointment) => {
+          return compareDates(parseToDatetime(datetime), appointment.datetime);
+        });
+      if (conflictingDate) {
+        return res
+          .status(409)
+          .json({
+            message: `${parseToLocalDate(
+              conflictingDate.datetime
+            )} already occupied`,
+          });
       }
 
       const appointment = new Appointment({
         datetime: parseToDatetime(datetime),
-        status: "scheduled",
+        status: status ?? "scheduled",
         providerId,
         serviceId,
         clientId,
