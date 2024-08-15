@@ -4,10 +4,10 @@ import AppointmentInterface from "../types/AppointmentInterface";
 export default class Appointment implements AppointmentInterface {
   id?: number;
   datetime: string;
-  status: "done" | "canceled" | "scheduled";
+  status: "done" | "canceled" | "scheduled" | "unavailable";
   providerId: number;
   serviceId: number;
-  clientId: number;
+  clientId?: number;
 
   constructor({
     datetime,
@@ -43,6 +43,25 @@ export default class Appointment implements AppointmentInterface {
 
   static async getByProviderId(providerId: number): Promise<AppointmentInterface[] | null> {
     const sql = "SELECT * FROM Appointments WHERE providerId = ?";
+
+    return new Promise((resolve, reject) => {
+      conn.query(sql, [providerId], (err, results) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+
+        if (results.length > 0) {
+          const appointments = results;
+          resolve(appointments);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+  
+  static async getBusyDates(providerId: number): Promise<AppointmentInterface[] | null> {
+    const sql = "SELECT * FROM Appointments WHERE providerId = ? AND status != 'canceled'";
 
     return new Promise((resolve, reject) => {
       conn.query(sql, [providerId], (err, results) => {
