@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 import AppointmentInterface from "../types/AppointmentInterface";
 
 const findAvailableDates = (
-  occupiedDates: AppointmentInterface[],
+  occupiedDates: AppointmentInterface[]|null,
   startDate: string,
   endDate: string
 ): string[] => {
@@ -33,7 +33,7 @@ const findAvailableDates = (
       return false;
     }
 
-    return !occupiedDates.some((appointment) => {
+    return !occupiedDates?.some((appointment) => {
       const appointmentDate = moment.tz(appointment.datetime, timezone).format("YYYY-MM-DD HH:mm:ss");
       return date === appointmentDate;
     });

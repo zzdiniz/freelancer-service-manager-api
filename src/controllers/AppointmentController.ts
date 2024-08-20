@@ -63,10 +63,6 @@ export default class AppointmentController {
         parseInt(providerId as string)
       );
 
-      if (!busyDates) {
-        return res.status(404).json({ message: "No busy dates found" });
-      }
-
       const timezone = "America/Sao_Paulo";
       const startDate = moment
         .tz(timezone)
