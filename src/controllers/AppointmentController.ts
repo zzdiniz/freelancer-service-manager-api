@@ -84,4 +84,25 @@ export default class AppointmentController {
       return res.status(500).json({ message: error });
     }
   }
+  static async updateStatus(req:Request, res:Response) {
+    const {id,status} = req.body
+
+    if(!id || !status){
+      return res.status(422).json({message: 'Missing required fields'})
+    }
+
+    try {
+      const appointment = await Appointment.getById(id)
+
+      if(!appointment){
+        return res.status(404).json({message: 'Appointment not found'})
+      }
+
+      await Appointment.updateStatus(id, status)
+      
+      return res.status(201).json({message: 'updated'})
+    } catch (error) {
+      return res.status(500).json({messsage: error})
+    }
+  }
 }
