@@ -84,6 +84,7 @@ export default class AppointmentController {
       return res.status(500).json({ message: error });
     }
   }
+
   static async updateStatus(req:Request, res:Response) {
     const {id,status} = req.body
 
@@ -99,10 +100,30 @@ export default class AppointmentController {
       }
 
       await Appointment.updateStatus(id, status)
-      
+
       return res.status(201).json({message: 'updated'})
     } catch (error) {
       return res.status(500).json({messsage: error})
+    }
+  }
+
+  static async getLatest(req: Request, res: Response){
+    const {providerId,clientId} = req.body
+
+    if(!providerId || !clientId){
+      return res.status(422).json({message: 'missing required fields'})
+    }
+
+    try {
+      const appointment = await Appointment.getLatest(providerId,clientId)
+
+      if(!appointment){
+        return res.status(404).json({message: 'Appointment not found'})
+      }
+
+      return res.status(200).json(appointment)
+    } catch (error) {
+      return res.status(500).json({message: error})
     }
   }
 }

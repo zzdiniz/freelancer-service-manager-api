@@ -101,13 +101,32 @@ export default class Appointment implements AppointmentInterface {
   static async updateStatus(id:number, status:string) {
     const sql = `UPDATE Appointments SET status = ? WHERE id = ?`;
     const params = [status,id];
-    
+
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {
         if (err) {
           return reject(new Error(err.message));
         }
         resolve();
+      });
+    });
+  }
+
+  static async getLatest(providerId: number,clientId:number): Promise<AppointmentInterface | null> {
+    const sql = "SELECT * FROM Appointments WHERE (providerId = ? AND clientId = ?) AND status != 'done' ORDER BY datetime DESC LIMIT 1";
+
+    return new Promise((resolve, reject) => {
+      conn.query(sql, [providerId,clientId], (err, results) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+
+        if (results.length > 0) {
+          const appointment = results[0];
+          resolve(appointment);
+        } else {
+          resolve(null);
+        }
       });
     });
   }
