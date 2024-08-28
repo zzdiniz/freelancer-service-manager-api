@@ -108,14 +108,14 @@ export default class AppointmentController {
   }
 
   static async getLatest(req: Request, res: Response){
-    const {providerId,clientId} = req.params
+    const {providerId,clientId} = req.query
 
     if(!providerId || !clientId){
       return res.status(422).json({message: 'missing required fields'})
     }
 
     try {
-      const appointment = await Appointment.getLatest(parseInt(providerId),parseInt(clientId))
+      const appointment = await Appointment.getLatest(parseInt(providerId as string),parseInt(clientId as string))
 
       if(!appointment){
         return res.status(404).json({message: 'Appointment not found'})
