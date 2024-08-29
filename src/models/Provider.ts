@@ -1,4 +1,5 @@
 import conn from "../db/conn";
+import { MessageRequest } from "../types/MessageRequests";
 import ProviderInterface from "../types/ProviderInterface";
 
 class Provider implements ProviderInterface {
@@ -57,6 +58,21 @@ class Provider implements ProviderInterface {
           resolve(data.length > 0 ? data[0] : undefined);
         }
       });
+    });
+  }
+
+  public static async sendMessageRequest({
+    clientId,
+    message,
+    providerId,
+    status,
+  }: MessageRequest) {
+    const sql =
+      "INSERT INTO MessageRequests (providerId,clientId,message,status) VALUES (?,?,?,?)";
+    conn.query(sql, [providerId, clientId, message, status], (err) => {
+      if (err) {
+        throw new Error(err.message);
+      }
     });
   }
 }
