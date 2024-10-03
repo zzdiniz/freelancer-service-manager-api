@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { genSalt, hash, compare } from "bcrypt";
 import Provider from "../models/Provider";
 import createProviderToken from "../helpers/create-provider-token";
+import getProviderToken from "../helpers/get-provider-token";
+import { JwtPayload, verify } from "jsonwebtoken";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -28,7 +30,7 @@ export default class ProviderController {
     const provider = new Provider({ name, email, password: passwordHash });
     try {
       await provider.insert();
-      return createProviderToken(provider.getEmail(), res);
+      return createProviderToken(`${provider.id}`, res);
     } catch (error) {
       return res.status(500).json({ message: error });
     }
@@ -52,7 +54,7 @@ export default class ProviderController {
       return res.status(422).json({ message: "Password invalid" });
     }
 
-    return createProviderToken(provider.email, res);
+    return createProviderToken(`${provider.id}`, res);
   }
 
   static async getById(req: Request, res: Response) {
@@ -75,7 +77,7 @@ export default class ProviderController {
     }
   }
   static async sendMessageRequest(req: Request, res: Response) {
-    const { providerId, clientId, message} = req.body;
+    const { providerId, clientId, message } = req.body;
 
     if (!providerId || !clientId || !message) {
       res.status(422).json({ message: "Missing required fields" });
@@ -86,12 +88,38 @@ export default class ProviderController {
         clientId,
         message,
         providerId,
-        status: "pending_response"
+        status: "pending_response",
       });
 
       return res.status(201).json({ message: "Request sent" });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
+  }
+  static async validate(req: Request, res: Response) {
+    if (req.headers.authorization) {
+      const token = getProviderToken(req);
+      if (!token) {
+        return res
+          .status(422)
+          .json({ message: "Authorization token was not sent" });
+      }
+      const tokenDecoded = verify(token, "secretSP") as JwtPayload;
+      const currentUser = await Provider.getById(tokenDecoded.id);
+      if (!currentUser) {
+        return res.status(404).json({ message: "Provider not found" });
+      }
+
+      return res
+        .status(200)
+        .json({
+          id: currentUser.id,
+          name: currentUser.name,
+          email: currentUser.email,
+        });
+    }
+    return res
+      .status(422)
+      .json({ message: "Authorization token was not sent" });
   }
 }

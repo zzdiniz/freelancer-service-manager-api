@@ -4,6 +4,7 @@ import BotRoutes from "./routes/BotRoutes"
 import ServiceRoutes from "./routes/ServiceRoutes"
 import ClientRoutes from "./routes/ClientRoutes"
 import AppointmentRoutes from "./routes/AppointmentRoutes"
+import cors from "cors"
 
 const app = express();
 
@@ -11,6 +12,7 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(express.static("public"));
+app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 app.use('/provider',ProviderRoutes)
 app.use('/bot',BotRoutes)
 app.use('/service', ServiceRoutes)

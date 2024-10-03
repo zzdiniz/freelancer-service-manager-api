@@ -1,10 +1,10 @@
 import { sign } from "jsonwebtoken";
 import { Response } from "express";
 
-const createProviderToken = (providerEmail: string, res: Response) => {
+const createProviderToken = (providerId: string, res: Response) => {
   const token = sign(
     {
-      email: providerEmail,
+      id: providerId,
     },
     "secretSP"
   );

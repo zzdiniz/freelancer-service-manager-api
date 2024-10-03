@@ -11,7 +11,7 @@ const verifyProviderToken = async (req: Request, res: Response, next: NextFuncti
 
   try {
     const tokenDecoded = verify(token, "secretSP") as JwtPayload;
-    const provider = await Provider.getByEmail(tokenDecoded.email);
+    const provider = await Provider.getById(tokenDecoded.id);
     res.locals.provider = provider;
 
     next();
