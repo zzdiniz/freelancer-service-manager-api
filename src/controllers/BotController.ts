@@ -7,6 +7,7 @@ import getBotInfosByMsg from "../helpers/get-bot-infos-by-msg";
 import Bot from "../models/Bot";
 import ProviderInterface from "../types/ProviderInterface";
 import getTelegramQrCode from "../helpers/get-telegram-qr-code";
+import TelegramBot from "node-telegram-bot-api";
 
 export default class BotController {
   static async create(req: Request, res: Response) {
@@ -62,11 +63,16 @@ export default class BotController {
         providerId: provider.id as number,
       });
       bot.insert();
-      return;
+
+      const telegramBot = new TelegramBot(bot.token,{polling:false})
+      const baseUrl = "https://ferrarezzo.loca.lt"
+      telegramBot.setWebHook(`${baseUrl}/webhook/${bot.providerId}`)
+
     } catch (error) {
       return res.status(500).json({ message: error });
     } finally {
       await browser.close();
+      return
     }
   }
 
@@ -108,5 +114,27 @@ export default class BotController {
     } catch (error) {
       return res.status(500).json({message: error})
     } 
+  }
+
+  static async getByProviderId(req: Request, res: Response){
+    const { id } = req.params
+
+    if(!id){
+      return res.status(422).json({message: 'You must send an id'})
+    }
+
+    try {
+      const bot = await Bot.getByProviderId(parseInt(id))
+
+      if(!bot){
+        return res.status(404).json({message: `Unable to find bot with provider id: ${id}`})
+      }
+
+      return res.status(200).json(bot)
+      
+    } catch (error) {
+      return res.status(500).json({message: error})
+    } 
+
   }
 }
