@@ -25,8 +25,9 @@ export default class BotController {
       await page.goto("https://web.telegram.org/k/");
 
       const qrcode = await getTelegramQrCode(page);
-      res.setHeader("Content-Type", "image/png");
-      res.send(Buffer.from(qrcode, "base64"));
+      res.setHeader("Content-Type", "application/json");
+      const base64Image = `data:image/png;base64,${qrcode}`;
+      res.json({ image: base64Image });
 
       await page.waitForSelector(".input-search", { timeout: 0 });
       await page.click(".input-search");

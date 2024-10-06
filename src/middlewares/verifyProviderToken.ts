@@ -12,6 +12,10 @@ const verifyProviderToken = async (req: Request, res: Response, next: NextFuncti
   try {
     const tokenDecoded = verify(token, "secretSP") as JwtPayload;
     const provider = await Provider.getById(tokenDecoded.id);
+
+    if(!provider){
+      return res.status(404).json({message: 'Provider not found'})
+    }
     res.locals.provider = provider;
 
     next();
