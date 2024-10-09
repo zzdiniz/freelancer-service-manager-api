@@ -5,6 +5,7 @@ import parseToLocalDate from "../helpers/parse-to-local-date";
 import compareDates from "../helpers/compare-dates";
 import findAvailableDates from "../helpers/find-available-dates";
 import moment from "moment-timezone";
+import ProviderInterface from "../types/ProviderInterface";
 
 export default class AppointmentController {
   static async addAppointment(req: Request, res: Response) {
@@ -122,6 +123,22 @@ export default class AppointmentController {
       }
 
       return res.status(200).json(appointment)
+    } catch (error) {
+      return res.status(500).json({message: error})
+    }
+  }
+
+  static async getAll(req: Request, res: Response){
+    const provider = res.locals.provider as ProviderInterface;
+
+    try {
+      const appointments = await Appointment.getByProviderId(provider.id as number)
+
+      if(!appointments){
+        return res.status(404).json({message: 'No appointments found'})
+      }
+
+      return res.status(200).json(appointments)
     } catch (error) {
       return res.status(500).json({message: error})
     }
