@@ -3,6 +3,6 @@ export default interface AppointmentInterface{
     datetime: string;
     status: 'done' | 'canceled' | 'scheduled' | 'unavailable'
     providerId: number;
-    serviceId: number;
+    serviceId?: number;
     clientId?: number;
 }

@@ -4,6 +4,7 @@ import Provider from "../models/Provider";
 import createProviderToken from "../helpers/create-provider-token";
 import getProviderToken from "../helpers/get-provider-token";
 import { JwtPayload, verify } from "jsonwebtoken";
+import ProviderInterface from "../types/ProviderInterface";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -76,6 +77,7 @@ export default class ProviderController {
       return res.status(500).json({ message: error });
     }
   }
+
   static async sendMessageRequest(req: Request, res: Response) {
     const { providerId, clientId, message } = req.body;
 
@@ -96,6 +98,7 @@ export default class ProviderController {
       return res.status(500).json({ message: error });
     }
   }
+
   static async validate(req: Request, res: Response) {
     if (req.headers.authorization) {
       const token = getProviderToken(req);
@@ -121,5 +124,16 @@ export default class ProviderController {
     return res
       .status(422)
       .json({ message: "Authorization token was not sent" });
+  }
+
+  static async getMessageRequests(req: Request, res: Response) {
+    const provider = res.locals.provider as ProviderInterface;
+
+    try {
+      const requests = await Provider.getMessageRequests(provider.id as number)
+      return res.status(200).json({requests})
+    } catch (error) {
+      return res.status(500).json({message:error})
+    }
   }
 }

@@ -75,6 +75,18 @@ class Provider implements ProviderInterface {
       }
     });
   }
+
+  public static async getMessageRequests(providerId: number): Promise<MessageRequest[]|undefined>{
+    return new Promise((resolve,reject)=>{
+      const sql = "SELECT * FROM MessageRequests WHERE providerId=?";
+      conn.query(sql, [providerId], (err,data) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(data)
+      });
+    })
+  }
 }
 
 export default Provider;
