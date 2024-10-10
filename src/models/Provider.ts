@@ -78,7 +78,7 @@ class Provider implements ProviderInterface {
 
   public static async getMessageRequests(providerId: number): Promise<MessageRequest[]|undefined>{
     return new Promise((resolve,reject)=>{
-      const sql = "SELECT * FROM MessageRequests WHERE providerId=?";
+      const sql = "SELECT * FROM MessageRequests WHERE providerId=? AND status='pending_response'";
       conn.query(sql, [providerId], (err,data) => {
         if (err) {
           reject(err);
@@ -86,6 +86,20 @@ class Provider implements ProviderInterface {
         resolve(data)
       });
     })
+  }
+
+  static async updateMessageRequest(resquestId:number) {
+    const sql = `UPDATE MessageRequests SET status = 'responded' WHERE id = ?`;
+    const params = [resquestId];
+
+    return new Promise<void>((resolve, reject) => {
+      conn.query(sql, params, (err) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+        resolve();
+      });
+    });
   }
 }
 

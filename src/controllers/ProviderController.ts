@@ -5,6 +5,8 @@ import createProviderToken from "../helpers/create-provider-token";
 import getProviderToken from "../helpers/get-provider-token";
 import { JwtPayload, verify } from "jsonwebtoken";
 import ProviderInterface from "../types/ProviderInterface";
+import Bot from "../models/Bot";
+import TelegramBot from "node-telegram-bot-api";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -132,6 +134,28 @@ export default class ProviderController {
     try {
       const requests = await Provider.getMessageRequests(provider.id as number)
       return res.status(200).json({requests})
+    } catch (error) {
+      return res.status(500).json({message:error})
+    }
+  }
+
+  static async respondMessageRequest(req: Request, res: Response) {
+    const provider = res.locals.provider as ProviderInterface;
+    const {requestId,clientId,response} = req.body
+
+    if(!requestId || !clientId || !response) {
+      return res.status(422).json({message: 'Missing required fields'})
+    }
+
+    try {
+      const botData = await Bot.getByProviderId(provider.id as number)
+      const telegramBot = new TelegramBot(botData?.token as string)
+
+      await telegramBot.sendMessage(clientId,response)
+
+      await Provider.updateMessageRequest(requestId)
+
+      return res.status(200).json({message: "message sent"})
     } catch (error) {
       return res.status(500).json({message:error})
     }
