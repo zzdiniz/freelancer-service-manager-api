@@ -144,4 +144,18 @@ export default class Appointment implements AppointmentInterface {
       });
     });
   }
+
+  static async addReview(id:number, review:string) {
+    const sql = `UPDATE Appointments SET review = ? WHERE id = ?`;
+    const params = [review,id];
+
+    return new Promise<void>((resolve, reject) => {
+      conn.query(sql, params, (err) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+        resolve();
+      });
+    });
+  }
 }

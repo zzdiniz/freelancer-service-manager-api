@@ -150,15 +150,35 @@ export default class AppointmentController {
   }
 
   static async setDone(req: Request, res: Response) {
-    
     const provider = res.locals.provider as ProviderInterface;
     const currentDateTime = moment
       .tz("America/Sao_Paulo")
       .format("YYYY-MM-DD HH:mm:ss");
 
     try {
-      await Appointment.setDone(provider?.id as number,currentDateTime.toString())
-      return res.status(201).json({message: "Appointments updated!"});
+      await Appointment.setDone(
+        provider?.id as number,
+        currentDateTime.toString()
+      );
+      return res.status(201).json({ message: "Appointments updated!" });
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  static async addReview(req: Request, res: Response) {
+    const { appointmentId, review } = req.body;
+
+    if (!appointmentId || !review) {
+      return res.status(422).json({ message: "Missing required fields" });
+    }
+    if (review < 0 || review > 5) {
+      return res.status(422).json({ message: "Invalid review" });
+    }
+
+    try {
+      await Appointment.addReview(appointmentId, review);
+      return res.status(201).json({ message: "Review added" });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
