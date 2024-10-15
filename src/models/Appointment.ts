@@ -6,7 +6,7 @@ export default class Appointment implements AppointmentInterface {
   datetime: string;
   status: "done" | "canceled" | "scheduled" | "unavailable";
   providerId: number;
-  serviceId: number;
+  serviceId?: number;
   clientId?: number;
 
   constructor({
@@ -101,6 +101,20 @@ export default class Appointment implements AppointmentInterface {
   static async updateStatus(id:number, status:string) {
     const sql = `UPDATE Appointments SET status = ? WHERE id = ?`;
     const params = [status,id];
+
+    return new Promise<void>((resolve, reject) => {
+      conn.query(sql, params, (err) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+        resolve();
+      });
+    });
+  }
+
+  static async setDone(providerId:number, datetime:string) {
+    const sql = `UPDATE Appointments SET status = 'done' WHERE providerId = ? AND status = 'scheduled' AND datetime < ?`;
+    const params = [providerId,datetime];
 
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {

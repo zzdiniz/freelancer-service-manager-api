@@ -86,61 +86,81 @@ export default class AppointmentController {
     }
   }
 
-  static async updateStatus(req:Request, res:Response) {
-    const {id,status} = req.body
+  static async updateStatus(req: Request, res: Response) {
+    const { id, status } = req.body;
 
-    if(!id || !status){
-      return res.status(422).json({message: 'Missing required fields'})
+    if (!id || !status) {
+      return res.status(422).json({ message: "Missing required fields" });
     }
 
     try {
-      const appointment = await Appointment.getById(id)
+      const appointment = await Appointment.getById(id);
 
-      if(!appointment){
-        return res.status(404).json({message: 'Appointment not found'})
+      if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found" });
       }
 
-      await Appointment.updateStatus(id, status)
+      await Appointment.updateStatus(id, status);
 
-      return res.status(201).json({message: 'updated'})
+      return res.status(201).json({ message: "updated" });
     } catch (error) {
-      return res.status(500).json({messsage: error})
+      return res.status(500).json({ messsage: error });
     }
   }
 
-  static async getLatest(req: Request, res: Response){
-    const {providerId,clientId} = req.query
+  static async getLatest(req: Request, res: Response) {
+    const { providerId, clientId } = req.query;
 
-    if(!providerId || !clientId){
-      return res.status(422).json({message: 'missing required fields'})
+    if (!providerId || !clientId) {
+      return res.status(422).json({ message: "missing required fields" });
     }
 
     try {
-      const appointment = await Appointment.getLatest(parseInt(providerId as string),parseInt(clientId as string))
+      const appointment = await Appointment.getLatest(
+        parseInt(providerId as string),
+        parseInt(clientId as string)
+      );
 
-      if(!appointment){
-        return res.status(404).json({message: 'Appointment not found'})
+      if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found" });
       }
 
-      return res.status(200).json(appointment)
+      return res.status(200).json(appointment);
     } catch (error) {
-      return res.status(500).json({message: error})
+      return res.status(500).json({ message: error });
     }
   }
 
-  static async getAll(req: Request, res: Response){
+  static async getAll(req: Request, res: Response) {
     const provider = res.locals.provider as ProviderInterface;
 
     try {
-      const appointments = await Appointment.getByProviderId(provider.id as number)
+      const appointments = await Appointment.getByProviderId(
+        provider.id as number
+      );
 
-      if(!appointments){
-        return res.status(404).json({message: 'No appointments found'})
+      if (!appointments) {
+        return res.status(404).json({ message: "No appointments found" });
       }
 
-      return res.status(200).json(appointments)
+      return res.status(200).json(appointments);
     } catch (error) {
-      return res.status(500).json({message: error})
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  static async setDone(req: Request, res: Response) {
+    
+    const provider = res.locals.provider as ProviderInterface;
+    const currentDateTime = moment
+      .tz("America/Sao_Paulo")
+      .format("YYYY-MM-DD HH:mm:ss");
+
+    try {
+      await Appointment.setDone(provider?.id as number,currentDateTime.toString())
+      return res.status(201).json({message: "Appointments updated!"});
+    } catch (error) {
+      return res.status(500).json({ message: error });
     }
   }
 }
