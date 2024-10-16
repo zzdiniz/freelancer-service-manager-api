@@ -5,7 +5,7 @@ import Provider from "../models/Provider";
 export default class ClientController {
   static async create(req: Request, res: Response) {
     const { id, name, username } = req.body;
-    if (!id || !name || !username) {
+    if (!id || !name) {
       return res.status(422).json({ message: "Missing required fields" });
     }
 

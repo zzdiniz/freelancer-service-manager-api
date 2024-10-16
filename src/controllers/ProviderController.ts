@@ -166,7 +166,9 @@ export default class ProviderController {
     const provider = res.locals.provider as ProviderInterface;
 
     try {
-      const appointments = await Appointment.getByProviderId(provider?.id as number)
+      const appointments = await Appointment.getByProviderId(
+        provider?.id as number
+      );
 
       const services = await Service.getByProviderId(provider?.id as number);
 
@@ -174,30 +176,60 @@ export default class ProviderController {
       const startOfMonth = moment.tz(timezone).startOf("month");
       const endOfMonth = moment.tz(timezone).endOf("month");
 
-      const monthAppointments = appointments?.filter((appointment) => {
-        const parsedDatetime = moment.tz(appointment.datetime, timezone);
+      const monthAppointments =
+        appointments?.filter((appointment) => {
+          const parsedDatetime = moment.tz(appointment.datetime, timezone);
 
-        return parsedDatetime.isBetween(startOfMonth, endOfMonth) && appointment.status !== 'unavailable';
-      }) ?? [];
+          return (
+            parsedDatetime.isBetween(startOfMonth, endOfMonth) &&
+            appointment.status !== "unavailable"
+          );
+        }) ?? [];
 
-      const finishedAppointments = monthAppointments?.filter(appointment => appointment.status === 'done')
-      const monthEarnings = finishedAppointments?.reduce((total, appointment) => {
-        const currentService = services?.find(
-          (service) => service.id === appointment.serviceId
-        );
+      const finishedAppointments = monthAppointments?.filter(
+        (appointment) => appointment.status === "done"
+      );
+      const monthEarnings = finishedAppointments?.reduce(
+        (total, appointment) => {
+          const currentService = services?.find(
+            (service) => service.id === appointment.serviceId
+          );
 
-        return currentService ? total + currentService.price : total;
-      }, 0);
+          return currentService ? total + currentService.price : total;
+        },
+        0
+      );
 
       const averageTicket =
         (finishedAppointments ?? []).length > 0
           ? (monthEarnings ?? 0) / (finishedAppointments ?? []).length
           : 0;
 
-       const cancellations = monthAppointments?.filter(appointment => appointment.status === 'canceled').length;
-       const cancellationRate = monthAppointments.length > 0? (cancellations/monthAppointments.length) * 100 : 0;
+      const cancellations = monthAppointments?.filter(
+        (appointment) => appointment.status === "canceled"
+      ).length;
+      const cancellationRate =
+        monthAppointments.length > 0
+          ? (cancellations / monthAppointments.length) * 100
+          : 0;
 
-      return res.status(200).json({ monthEarnings, averageTicket, cancellationRate });
+      const uniqueClients = new Set<number>();
+      const recurringClients = new Set<number>();
+
+      appointments?.forEach((appointment) => {
+        if (appointment.clientId) {
+          if (uniqueClients.has(appointment.clientId)) {
+            recurringClients.add(appointment.clientId);
+          } else {
+            uniqueClients.add(appointment.clientId);
+          }
+        }
+      });
+
+      const retentionRate = (recurringClients.size/uniqueClients.size) * 100
+      return res
+        .status(200)
+        .json({ monthEarnings, averageTicket, cancellationRate,retentionRate });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
