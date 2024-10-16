@@ -7,6 +7,9 @@ import { JwtPayload, verify } from "jsonwebtoken";
 import ProviderInterface from "../types/ProviderInterface";
 import Bot from "../models/Bot";
 import TelegramBot from "node-telegram-bot-api";
+import Appointment from "../models/Appointment";
+import Service from "../models/Service";
+import moment from "moment";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -115,13 +118,11 @@ export default class ProviderController {
         return res.status(404).json({ message: "Provider not found" });
       }
 
-      return res
-        .status(200)
-        .json({
-          id: currentUser.id,
-          name: currentUser.name,
-          email: currentUser.email,
-        });
+      return res.status(200).json({
+        id: currentUser.id,
+        name: currentUser.name,
+        email: currentUser.email,
+      });
     }
     return res
       .status(422)
@@ -132,32 +133,73 @@ export default class ProviderController {
     const provider = res.locals.provider as ProviderInterface;
 
     try {
-      const requests = await Provider.getMessageRequests(provider.id as number)
-      return res.status(200).json({requests})
+      const requests = await Provider.getMessageRequests(provider.id as number);
+      return res.status(200).json({ requests });
     } catch (error) {
-      return res.status(500).json({message:error})
+      return res.status(500).json({ message: error });
     }
   }
 
   static async respondMessageRequest(req: Request, res: Response) {
     const provider = res.locals.provider as ProviderInterface;
-    const {requestId,clientId,response} = req.body
+    const { requestId, clientId, response } = req.body;
 
-    if(!requestId || !clientId || !response) {
-      return res.status(422).json({message: 'Missing required fields'})
+    if (!requestId || !clientId || !response) {
+      return res.status(422).json({ message: "Missing required fields" });
     }
 
     try {
-      const botData = await Bot.getByProviderId(provider.id as number)
-      const telegramBot = new TelegramBot(botData?.token as string)
+      const botData = await Bot.getByProviderId(provider.id as number);
+      const telegramBot = new TelegramBot(botData?.token as string);
 
-      await telegramBot.sendMessage(clientId,response)
+      await telegramBot.sendMessage(clientId, response);
 
-      await Provider.updateMessageRequest(requestId)
+      await Provider.updateMessageRequest(requestId);
 
-      return res.status(200).json({message: "message sent"})
+      return res.status(200).json({ message: "message sent" });
     } catch (error) {
-      return res.status(500).json({message:error})
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  static async getMetrics(req: Request, res: Response) {
+    const provider = res.locals.provider as ProviderInterface;
+
+    try {
+      const appointments = await Appointment.getByProviderId(provider?.id as number)
+
+      const services = await Service.getByProviderId(provider?.id as number);
+
+      const timezone = "America/Sao_Paulo";
+      const startOfMonth = moment.tz(timezone).startOf("month");
+      const endOfMonth = moment.tz(timezone).endOf("month");
+
+      const monthAppointments = appointments?.filter((appointment) => {
+        const parsedDatetime = moment.tz(appointment.datetime, timezone);
+
+        return parsedDatetime.isBetween(startOfMonth, endOfMonth) && appointment.status !== 'unavailable';
+      }) ?? [];
+
+      const finishedAppointments = monthAppointments?.filter(appointment => appointment.status === 'done')
+      const monthEarnings = finishedAppointments?.reduce((total, appointment) => {
+        const currentService = services?.find(
+          (service) => service.id === appointment.serviceId
+        );
+
+        return currentService ? total + currentService.price : total;
+      }, 0);
+
+      const averageTicket =
+        (finishedAppointments ?? []).length > 0
+          ? (monthEarnings ?? 0) / (finishedAppointments ?? []).length
+          : 0;
+
+       const cancellations = monthAppointments?.filter(appointment => appointment.status === 'canceled').length;
+       const cancellationRate = monthAppointments.length > 0? (cancellations/monthAppointments.length) * 100 : 0;
+
+      return res.status(200).json({ monthEarnings, averageTicket, cancellationRate });
+    } catch (error) {
+      return res.status(500).json({ message: error });
     }
   }
 }
