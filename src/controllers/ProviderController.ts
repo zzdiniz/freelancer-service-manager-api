@@ -226,7 +226,7 @@ export default class ProviderController {
         }
       });
 
-      const retentionRate = (recurringClients.size/uniqueClients.size) * 100
+      const retentionRate = (recurringClients.size / uniqueClients.size) * 100;
 
       const serviceFrequency: Record<number, number> = {};
       finishedAppointments.forEach((appointment) => {
@@ -239,14 +239,28 @@ export default class ProviderController {
         }
       });
 
-      // Identifica o serviço mais recorrente
-      const mostFrequentServiceId = Object.keys(serviceFrequency).reduce((a, b) =>
-        serviceFrequency[parseInt(a)] > serviceFrequency[parseInt(b)] ? a : b
+      const mostFrequentServiceId = Object.keys(serviceFrequency).reduce(
+        (a, b) =>
+          serviceFrequency[parseInt(a)] > serviceFrequency[parseInt(b)] ? a : b
       );
 
-      return res
-        .status(200)
-        .json({ monthEarnings, averageTicket, cancellationRate,retentionRate,mostFrequentServiceId });
+      const ratings = finishedAppointments
+        .filter((appointment) => appointment.review)
+        .map((appointment) => appointment.review as number);
+
+      const averageRating =
+        ratings.length > 0
+          ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+          : 0;
+
+      return res.status(200).json({
+        monthEarnings,
+        averageTicket,
+        cancellationRate,
+        retentionRate,
+        mostFrequentServiceId,
+        averageRating,
+      });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
