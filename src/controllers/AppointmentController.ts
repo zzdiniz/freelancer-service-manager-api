@@ -68,8 +68,8 @@ export default class AppointmentController {
       const startDate = moment
         .tz(timezone)
         .set({ minute: 0, second: 0, millisecond: 0 });
-      const endDate = startDate.clone().add(1, "day").endOf("day");
-
+      const endDate = startDate.clone().add(1, "day").endOf("month");
+      
       const formattedStartDate = startDate.format("YYYY-MM-DDTHH:mm:ss");
       const formattedEndDate = endDate.format("YYYY-MM-DDTHH:mm:ss");
 
@@ -79,7 +79,7 @@ export default class AppointmentController {
         formattedEndDate
       );
 
-      return res.status(200).json(availableDates);
+      return res.status(200).json(availableDates.slice(0,9));
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: error });

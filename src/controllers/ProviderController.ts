@@ -227,9 +227,26 @@ export default class ProviderController {
       });
 
       const retentionRate = (recurringClients.size/uniqueClients.size) * 100
+
+      const serviceFrequency: Record<number, number> = {};
+      finishedAppointments.forEach((appointment) => {
+        if (appointment.serviceId) {
+          if (serviceFrequency[appointment.serviceId]) {
+            serviceFrequency[appointment.serviceId]++;
+          } else {
+            serviceFrequency[appointment.serviceId] = 1;
+          }
+        }
+      });
+
+      // Identifica o serviço mais recorrente
+      const mostFrequentServiceId = Object.keys(serviceFrequency).reduce((a, b) =>
+        serviceFrequency[parseInt(a)] > serviceFrequency[parseInt(b)] ? a : b
+      );
+
       return res
         .status(200)
-        .json({ monthEarnings, averageTicket, cancellationRate,retentionRate });
+        .json({ monthEarnings, averageTicket, cancellationRate,retentionRate,mostFrequentServiceId });
     } catch (error) {
       return res.status(500).json({ message: error });
     }
