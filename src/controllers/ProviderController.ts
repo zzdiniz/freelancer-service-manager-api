@@ -253,6 +253,36 @@ export default class ProviderController {
           ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
           : 0;
 
+      // Array para armazenar o número de agendamentos por mês
+      const appointmentsPerMonthArr = Array(12).fill(0); // Inicializa um array com 12 zeros
+
+      // Contagem de agendamentos por mês
+      appointments?.forEach((appointment) => {
+        const monthIndex = moment.tz(appointment.datetime, timezone).month(); // 0 a 11
+        appointmentsPerMonthArr[monthIndex]++;
+      });
+
+      // Nomes dos meses
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      // Formata o resultado no formato desejado
+      const appointmentsPerMonth = monthNames.map((month, index) => ({
+        month,
+        appointments: appointmentsPerMonthArr[index], // Número de agendamentos para o mês correspondente
+      }));
       return res.status(200).json({
         monthEarnings,
         averageTicket,
@@ -260,6 +290,7 @@ export default class ProviderController {
         retentionRate,
         mostFrequentServiceId,
         averageRating,
+        appointmentsPerMonth,
       });
     } catch (error) {
       return res.status(500).json({ message: error });
