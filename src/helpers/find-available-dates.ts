@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 import AppointmentInterface from "../types/AppointmentInterface";
 
 const findAvailableDates = (
-  occupiedDates: AppointmentInterface[]|null,
+  occupiedDates: AppointmentInterface[]|null|undefined,
   startDate: string,
   endDate: string
 ): string[] => {
@@ -27,7 +27,7 @@ const findAvailableDates = (
   return allDates.filter((date) => {
     const momentDate = moment.tz(date, timezone);
     const isWeekend = momentDate.day() === 0 || momentDate.day() === 6;
-    const isOutsideBusinessHours = momentDate.hour() < 9 || momentDate.hour() >= 18;
+    const isOutsideBusinessHours = momentDate.hour() < 9 || momentDate.hour() > 18;
 
     if (isWeekend || isOutsideBusinessHours) {
       return false;

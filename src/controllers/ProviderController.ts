@@ -10,6 +10,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Appointment from "../models/Appointment";
 import Service from "../models/Service";
 import moment from "moment";
+import findAvailableDates from "../helpers/find-available-dates";
 
 export default class ProviderController {
   static async create(req: Request, res: Response) {
@@ -283,6 +284,32 @@ export default class ProviderController {
         month,
         appointments: appointmentsPerMonthArr[index], // Número de agendamentos para o mês correspondente
       }));
+
+      const startOfWeek = moment.tz(timezone).startOf("week");
+      const endOfWeek = moment.tz(timezone).endOf("week");
+
+      const formattedStartDate = startOfWeek.format("YYYY-MM-DDTHH:mm:ss");
+      const formattedEndDate = endOfWeek.format("YYYY-MM-DDTHH:mm:ss");
+
+      const busyWeekDates = monthAppointments?.filter((appointment) => {
+        const parsedDatetime = moment.tz(appointment.datetime, timezone);
+        return (
+          parsedDatetime.isBetween(startOfWeek, endOfWeek) &&
+          appointment.status !== "canceled"
+        );
+      });
+
+      const availableDates = findAvailableDates(
+        busyWeekDates,
+        formattedStartDate,
+        formattedEndDate
+      );
+
+      const occupationRate = {
+        availableDates: availableDates.length,
+        busyDates: busyWeekDates.length
+      }
+
       return res.status(200).json({
         monthEarnings,
         averageTicket,
@@ -291,6 +318,7 @@ export default class ProviderController {
         mostFrequentServiceId,
         averageRating,
         appointmentsPerMonth,
+        occupationRate
       });
     } catch (error) {
       return res.status(500).json({ message: error });
