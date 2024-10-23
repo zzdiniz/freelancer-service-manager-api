@@ -76,21 +76,38 @@ class Provider implements ProviderInterface {
     });
   }
 
-  public static async getMessageRequests(providerId: number): Promise<MessageRequest[]|undefined>{
-    return new Promise((resolve,reject)=>{
-      const sql = "SELECT * FROM MessageRequests WHERE providerId=? AND status='pending_response'";
-      conn.query(sql, [providerId], (err,data) => {
+  public static async getMessageRequests(
+    providerId: number
+  ): Promise<MessageRequest[] | undefined> {
+    return new Promise((resolve, reject) => {
+      const sql =
+        "SELECT * FROM MessageRequests WHERE providerId=? AND status='pending_response'";
+      conn.query(sql, [providerId], (err, data) => {
         if (err) {
           reject(err);
         }
-        resolve(data)
+        resolve(data);
       });
-    })
+    });
   }
 
-  static async updateMessageRequest(resquestId:number) {
+  static async updateMessageRequest(resquestId: number) {
     const sql = `UPDATE MessageRequests SET status = 'responded' WHERE id = ?`;
     const params = [resquestId];
+
+    return new Promise<void>((resolve, reject) => {
+      conn.query(sql, params, (err) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+        resolve();
+      });
+    });
+  }
+
+  public async update(): Promise<void> {
+    const sql = `UPDATE Providers SET name = ?, email = ?, password = ? WHERE id = ?`;
+    const params = [this.name, this.email, this.password, this.id];
 
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {

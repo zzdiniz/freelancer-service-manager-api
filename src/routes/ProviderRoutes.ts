@@ -11,6 +11,7 @@ router.post("/respond-message-request",verifyProviderToken,ProviderController.re
 router.get("/validate",ProviderController.validate)
 router.get("/get-message-requests",verifyProviderToken,ProviderController.getMessageRequests)
 router.get("/get-metrics",verifyProviderToken,ProviderController.getMetrics)
+router.patch("/update",verifyProviderToken,ProviderController.updateProvider)
 router.get("/:id", ProviderController.getById)
 
 export default router;
