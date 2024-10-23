@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import ProviderInterface from "../types/ProviderInterface";
 import Service from "../models/Service";
+import ServiceInterface from "../types/ServiceInterface";
 
 export default class ServiceController {
   static async addService(req: Request, res: Response) {
@@ -59,6 +60,41 @@ export default class ServiceController {
       }
 
       return res.status(200).json(service);
+    } catch (error) {
+      return res.status(500).json({ message: error });
+    }
+  }
+
+  static async updateService(req: Request, res: Response) {
+    const { id } = req.query;
+    const { name, description, price, faq } = req.body;
+
+    if (!id) {
+      return res
+        .status(422)
+        .json({ message: "You must send a valid service id." });
+    }
+
+    try {
+
+      const existingService = await Service.getByServiceId(
+        parseInt(id as string)
+      );
+      if (!existingService) {
+        return res.status(404).json({ message: "Service not found." });
+      }
+
+      await Service.updateService(
+        parseInt(id as string),
+        {
+          name: name ?? existingService.name,
+          description: description ?? existingService.description,
+          price: price ?? existingService.price,
+        },
+        faq ? JSON.stringify(faq) : JSON.stringify(existingService.faq)
+      );
+
+      return res.status(200).json({ message: "Service updated." });
     } catch (error) {
       return res.status(500).json({ message: error });
     }

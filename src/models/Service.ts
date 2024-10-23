@@ -65,4 +65,31 @@ export default class Service implements ServiceInterface {
       });
     });
   }
+
+  public static async updateService(id: number, {name,description,price}:Partial<ServiceInterface>,faq:string): Promise<void> {
+    const sql = `UPDATE Services SET 
+      name = ?, 
+      description = ?, 
+      price = ?, 
+      faq = ? 
+    WHERE id = ?`;
+
+    const params = [
+      name,
+      description,
+      price,
+      faq,
+      id,
+    ];
+
+    return new Promise<void>((resolve, reject) => {
+      conn.query(sql, params, (err) => {
+        if (err) {
+          console.log("🚀 ~ Service ~ conn.query ~ err:", err)
+          return reject(new Error(err.message));
+        }
+        resolve();
+      });
+    });
+  }
 }
