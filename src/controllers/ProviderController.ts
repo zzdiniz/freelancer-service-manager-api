@@ -37,7 +37,8 @@ export default class ProviderController {
     const provider = new Provider({ name, email, password: passwordHash });
     try {
       await provider.insert();
-      return createProviderToken(`${provider.id}`, res);
+      const providerResponse = await Provider.getByEmail(provider.email)
+      return createProviderToken(`${providerResponse?.id}`, res);
     } catch (error) {
       return res.status(500).json({ message: error });
     }

@@ -85,7 +85,6 @@ export default class Service implements ServiceInterface {
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {
         if (err) {
-          console.log("🚀 ~ Service ~ conn.query ~ err:", err)
           return reject(new Error(err.message));
         }
         resolve();
