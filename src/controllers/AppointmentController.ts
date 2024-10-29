@@ -33,6 +33,10 @@ export default class AppointmentController {
           return compareDates(parseToDatetime(datetime), appointment.datetime);
         });
       if (conflictingDate) {
+        if(conflictingDate.status === "canceled"){
+          await Appointment.updateStatus(conflictingDate.id as number, "scheduled");
+          return res.status(201).json({ message: "Scheduled!" });
+        }
         return res.status(409).json({
           message: `${parseToLocalDate(
             conflictingDate.datetime
@@ -48,7 +52,7 @@ export default class AppointmentController {
         clientId,
       });
       await appointment.insert();
-
+ 
       return res.status(201).json({ message: "Scheduled!" });
     } catch (error) {
       return res.status(500).json({ message: error });
