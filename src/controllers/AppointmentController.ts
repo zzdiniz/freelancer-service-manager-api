@@ -180,7 +180,7 @@ export default class AppointmentController {
             const botData = await Bot.getByProviderId(provider.id as number);
             const telegramBot = new TelegramBot(botData?.token as string);
             const buttons = Array.from({ length: 6 }, (_, i) => [
-              { text: i.toString(), callback_data: `rating_${i}` },
+              { text: i.toString(), callback_data: `rating_${i}:${appointment.id}` },
             ]);
 
             await telegramBot.sendMessage(
