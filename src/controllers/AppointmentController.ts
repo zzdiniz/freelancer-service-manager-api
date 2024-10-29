@@ -6,6 +6,9 @@ import compareDates from "../helpers/compare-dates";
 import findAvailableDates from "../helpers/find-available-dates";
 import moment from "moment-timezone";
 import ProviderInterface from "../types/ProviderInterface";
+import Client from "../models/Client";
+import TelegramBot from "node-telegram-bot-api";
+import Bot from "../models/Bot";
 
 export default class AppointmentController {
   static async addAppointment(req: Request, res: Response) {
@@ -69,7 +72,7 @@ export default class AppointmentController {
         .tz(timezone)
         .set({ minute: 0, second: 0, millisecond: 0 });
       const endDate = startDate.clone().add(1, "day").endOf("month");
-      
+
       const formattedStartDate = startDate.format("YYYY-MM-DDTHH:mm:ss");
       const formattedEndDate = endDate.format("YYYY-MM-DDTHH:mm:ss");
 
@@ -79,7 +82,7 @@ export default class AppointmentController {
         formattedEndDate
       );
 
-      return res.status(200).json(availableDates.slice(0,9));
+      return res.status(200).json(availableDates.slice(0, 9));
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: error });
@@ -156,10 +159,42 @@ export default class AppointmentController {
       .format("YYYY-MM-DD HH:mm:ss");
 
     try {
+      const almostDoneAppointments = await Appointment.getAlmostDone(
+        provider?.id as number,
+        currentDateTime.toString()
+      );
+
       await Appointment.setDone(
         provider?.id as number,
         currentDateTime.toString()
       );
+      if (almostDoneAppointments) {
+        almostDoneAppointments.forEach((appointment) => {
+          (async () => {
+            await Client.updateConversation({
+              providerId: appointment.providerId,
+              clientId: appointment.clientId as number,
+              conversationState: "initial_message",
+            });
+
+            const botData = await Bot.getByProviderId(provider.id as number);
+            const telegramBot = new TelegramBot(botData?.token as string);
+            const buttons = Array.from({ length: 6 }, (_, i) => [
+              { text: i.toString(), callback_data: `rating_${i}` },
+            ]);
+
+            await telegramBot.sendMessage(
+              appointment.clientId as number,
+              "Obrigado por realizar o serviço conosco!Para que possamos melhorar cada vez mais, poderia nos enviar uma avaliação de 0 a 5?",
+              {
+                reply_markup: {
+                  inline_keyboard: buttons,
+                },
+              }
+            );
+          })();
+        });
+      }
       return res.status(201).json({ message: "Appointments updated!" });
     } catch (error) {
       return res.status(500).json({ message: error });

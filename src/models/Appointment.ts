@@ -41,7 +41,9 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async getByProviderId(providerId: number): Promise<AppointmentInterface[] | null> {
+  static async getByProviderId(
+    providerId: number
+  ): Promise<AppointmentInterface[] | null> {
     const sql = "SELECT * FROM Appointments WHERE providerId = ?";
 
     return new Promise((resolve, reject) => {
@@ -60,8 +62,11 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async getFinished(providerId: number): Promise<AppointmentInterface[] | null> {
-    const sql = "SELECT * FROM Appointments WHERE providerId = ? AND status = 'done'";
+  static async getFinished(
+    providerId: number
+  ): Promise<AppointmentInterface[] | null> {
+    const sql =
+      "SELECT * FROM Appointments WHERE providerId = ? AND status = 'done'";
 
     return new Promise((resolve, reject) => {
       conn.query(sql, [providerId], (err, results) => {
@@ -77,7 +82,7 @@ export default class Appointment implements AppointmentInterface {
         }
       });
     });
-  } 
+  }
 
   static async getById(id: number): Promise<AppointmentInterface | null> {
     const sql = "SELECT * FROM Appointments WHERE id = ?";
@@ -98,8 +103,11 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async getBusyDates(providerId: number): Promise<AppointmentInterface[] | null> {
-    const sql = "SELECT * FROM Appointments WHERE providerId = ? AND status != 'canceled'";
+  static async getBusyDates(
+    providerId: number
+  ): Promise<AppointmentInterface[] | null> {
+    const sql =
+      "SELECT * FROM Appointments WHERE providerId = ? AND status != 'canceled'";
 
     return new Promise((resolve, reject) => {
       conn.query(sql, [providerId], (err, results) => {
@@ -117,9 +125,9 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async updateStatus(id:number, status:string) {
+  static async updateStatus(id: number, status: string) {
     const sql = `UPDATE Appointments SET status = ? WHERE id = ?`;
-    const params = [status,id];
+    const params = [status, id];
 
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {
@@ -131,9 +139,9 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async setDone(providerId:number, datetime:string) {
+  static async setDone(providerId: number, datetime: string) {
     const sql = `UPDATE Appointments SET status = 'done' WHERE providerId = ? AND status = 'scheduled' AND datetime < ?`;
-    const params = [providerId,datetime];
+    const params = [providerId, datetime];
 
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {
@@ -145,11 +153,36 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async getLatest(providerId: number,clientId:number): Promise<AppointmentInterface | null> {
-    const sql = "SELECT * FROM Appointments WHERE (providerId = ? AND clientId = ?) AND status != 'done' ORDER BY datetime DESC LIMIT 1";
+  static async getAlmostDone(
+    providerId: number,
+    datetime: string
+  ): Promise<AppointmentInterface[] | null> {
+    const sql = `SELECT * FROM Appointments WHERE providerId = ? AND status = 'scheduled' AND datetime < ?`;
+    return new Promise((resolve, reject) => {
+      conn.query(sql, [providerId,datetime], (err, results) => {
+        if (err) {
+          return reject(new Error(err.message));
+        }
+
+        if (results.length > 0) {
+          const appointments = results;
+          resolve(appointments);
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  static async getLatest(
+    providerId: number,
+    clientId: number
+  ): Promise<AppointmentInterface | null> {
+    const sql =
+      "SELECT * FROM Appointments WHERE (providerId = ? AND clientId = ?) AND status != 'done' ORDER BY datetime DESC LIMIT 1";
 
     return new Promise((resolve, reject) => {
-      conn.query(sql, [providerId,clientId], (err, results) => {
+      conn.query(sql, [providerId, clientId], (err, results) => {
         if (err) {
           return reject(new Error(err.message));
         }
@@ -164,9 +197,9 @@ export default class Appointment implements AppointmentInterface {
     });
   }
 
-  static async addReview(id:number, review:string) {
+  static async addReview(id: number, review: string) {
     const sql = `UPDATE Appointments SET review = ? WHERE id = ?`;
-    const params = [review,id];
+    const params = [review, id];
 
     return new Promise<void>((resolve, reject) => {
       conn.query(sql, params, (err) => {

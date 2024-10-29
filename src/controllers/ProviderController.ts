@@ -37,7 +37,7 @@ export default class ProviderController {
     const provider = new Provider({ name, email, password: passwordHash });
     try {
       await provider.insert();
-      const providerResponse = await Provider.getByEmail(provider.email)
+      const providerResponse = await Provider.getByEmail(provider.email);
       return createProviderToken(`${providerResponse?.id}`, res);
     } catch (error) {
       return res.status(500).json({ message: error });
@@ -259,10 +259,16 @@ export default class ProviderController {
       const appointmentsPerMonthArr = Array(12).fill(0); // Inicializa um array com 12 zeros
 
       // Contagem de agendamentos por mês
-      appointments?.forEach((appointment) => {
-        const monthIndex = moment.tz(appointment.datetime, timezone).month(); // 0 a 11
-        appointmentsPerMonthArr[monthIndex]++;
-      });
+      appointments
+        ?.filter(
+          (appointment) =>
+            appointment.status !== "canceled" &&
+            appointment.status !== "unavailable"
+        )
+        .forEach((appointment) => {
+          const monthIndex = moment.tz(appointment.datetime, timezone).month(); // 0 a 11
+          appointmentsPerMonthArr[monthIndex]++;
+        });
 
       // Nomes dos meses
       const monthNames = [
@@ -308,8 +314,8 @@ export default class ProviderController {
 
       const occupationRate = {
         availableDates: availableDates.length,
-        busyDates: busyWeekDates.length
-      }
+        busyDates: busyWeekDates.length,
+      };
 
       return res.status(200).json({
         monthEarnings,
@@ -319,7 +325,7 @@ export default class ProviderController {
         mostFrequentServiceId: parseInt(mostFrequentServiceId),
         averageRating,
         appointmentsPerMonth,
-        occupationRate
+        occupationRate,
       });
     } catch (error) {
       return res.status(500).json({ message: error });
@@ -330,40 +336,44 @@ export default class ProviderController {
     try {
       const provider = res.locals.provider as ProviderInterface;
       const { name, email, password } = req.body; // Obtém os dados do corpo da requisição (campos opcionais)
-  
+
       if (!provider) {
         return res.status(404).json({ message: "Provider not found" });
       }
-  
+
       if (email) {
         const existingProvider = await Provider.getByEmail(email);
         if (existingProvider && existingProvider.id !== provider.id) {
-          return res.status(400).json({ message: "Email is already in use by another provider" });
+          return res
+            .status(400)
+            .json({ message: "Email is already in use by another provider" });
         }
       }
 
       const salt = await genSalt(12);
       let passwordHash;
-      if(password){
-        passwordHash = await hash(password, salt)
+      if (password) {
+        passwordHash = await hash(password, salt);
       }
-      
+
       const updatedProviderData = {
         name: name || provider.name,
         email: email || provider.email,
         password: passwordHash || provider.password,
       };
-  
+
       // Atualiza o prestador no banco de dados
       const updatedProvider = new Provider(updatedProviderData);
       updatedProvider.id = provider.id; // Mantém o ID do prestador existente
-  
+
       // Chama o método de atualização no model
       await updatedProvider.update();
-  
+
       return res.status(200).json({ message: "Provider updated successfully" });
     } catch (err) {
-      return res.status(500).json({ message: "Error updating provider", error: err });
+      return res
+        .status(500)
+        .json({ message: "Error updating provider", error: err });
     }
   }
 }
