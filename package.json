@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsup src",
+    "build": "tsup src --out-dir dist",
+    "postbuild": "mkdir -p public && cp -r dist/* public/",
     "dev": "tsx watch src/index.ts"
   },
   "keywords": [],
