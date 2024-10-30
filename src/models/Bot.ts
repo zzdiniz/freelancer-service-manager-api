@@ -44,8 +44,8 @@ export default class Bot implements BotInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const botData = results[0];
+        if (Array.isArray(results) && results.length > 0) {
+          const botData = results[0] as BotInterface;
           const bot = new Bot({
             id: botData.id,
             name: botData.name,
@@ -71,8 +71,8 @@ export default class Bot implements BotInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const botData = results[0];
+        if (Array.isArray(results) && results.length > 0) {
+          const botData = results[0] as BotInterface;
           const bot = new Bot({
             id: botData.id,
             name: botData.name,
@@ -98,8 +98,8 @@ export default class Bot implements BotInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const botData = results[0];
+        if (Array.isArray(results) &&  results.length > 0) {
+          const botData = results[0] as BotInterface;
           const bot = new Bot({
             id: botData.id,
             name: botData.name,

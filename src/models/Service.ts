@@ -45,7 +45,7 @@ export default class Service implements ServiceInterface {
         if (err) {
           reject(err);
         } else {
-          resolve(data.length > 0 ? data : undefined);
+          resolve(Array.isArray(data) && data.length > 0 ? data as ServiceInterface[] : undefined);
         }
       });
     });
@@ -60,7 +60,7 @@ export default class Service implements ServiceInterface {
         if (err) {
           reject(err);
         } else {
-          resolve(data.length > 0 ? data[0] : undefined);
+          resolve(Array.isArray(data) && data.length > 0 ? data[0] as ServiceInterface : undefined);
         }
       });
     });

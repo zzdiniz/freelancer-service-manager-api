@@ -196,8 +196,7 @@ export default class ProviderController {
           const currentService = services?.find(
             (service) => service.id === appointment.serviceId
           );
-
-          return currentService ? total + currentService.price : total;
+          return currentService ? total + parseFloat(currentService.price.toString()) : total;
         },
         0
       );

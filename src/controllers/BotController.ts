@@ -8,6 +8,7 @@ import Bot from "../models/Bot";
 import ProviderInterface from "../types/ProviderInterface";
 import getTelegramQrCode from "../helpers/get-telegram-qr-code";
 import TelegramBot from "node-telegram-bot-api";
+import dotenv from "dotenv";
 
 export default class BotController {
   static async create(req: Request, res: Response) {
@@ -66,7 +67,8 @@ export default class BotController {
       bot.insert();
 
       const telegramBot = new TelegramBot(bot.token,{polling:false})
-      const baseUrl = "https://ferrarezzo.loca.lt"
+      dotenv.config();
+      const baseUrl = process.env.WEBHOOK_URL
       telegramBot.setWebHook(`${baseUrl}/webhook/${bot.providerId}`)
 
     } catch (error) {

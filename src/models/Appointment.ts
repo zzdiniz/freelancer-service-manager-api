@@ -52,9 +52,9 @@ export default class Appointment implements AppointmentInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointments = results;
-          resolve(appointments);
+        // Verifique se 'results' é um array para garantir que seja o tipo esperado
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results as AppointmentInterface[]);
         } else {
           resolve(null);
         }
@@ -74,9 +74,8 @@ export default class Appointment implements AppointmentInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointments = results;
-          resolve(appointments);
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results as AppointmentInterface[]);
         } else {
           resolve(null);
         }
@@ -93,9 +92,8 @@ export default class Appointment implements AppointmentInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointments = results;
-          resolve(appointments);
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results[0] as AppointmentInterface);
         } else {
           resolve(null);
         }
@@ -115,9 +113,8 @@ export default class Appointment implements AppointmentInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointments = results;
-          resolve(appointments);
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results as AppointmentInterface[]);
         } else {
           resolve(null);
         }
@@ -159,14 +156,13 @@ export default class Appointment implements AppointmentInterface {
   ): Promise<AppointmentInterface[] | null> {
     const sql = `SELECT * FROM Appointments WHERE providerId = ? AND status = 'scheduled' AND datetime < ?`;
     return new Promise((resolve, reject) => {
-      conn.query(sql, [providerId,datetime], (err, results) => {
+      conn.query(sql, [providerId, datetime], (err, results) => {
         if (err) {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointments = results;
-          resolve(appointments);
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results as AppointmentInterface[]);
         } else {
           resolve(null);
         }
@@ -187,9 +183,8 @@ export default class Appointment implements AppointmentInterface {
           return reject(new Error(err.message));
         }
 
-        if (results.length > 0) {
-          const appointment = results[0];
-          resolve(appointment);
+        if (Array.isArray(results) && results.length > 0) {
+          resolve(results[0] as AppointmentInterface);
         } else {
           resolve(null);
         }

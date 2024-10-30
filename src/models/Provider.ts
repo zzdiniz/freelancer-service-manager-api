@@ -40,7 +40,7 @@ class Provider implements ProviderInterface {
         if (err) {
           reject(err);
         } else {
-          resolve(data.length > 0 ? data[0] : undefined);
+          resolve(Array.isArray(data) && data.length > 0 ? data[0] as ProviderInterface : undefined);
         }
       });
     });
@@ -55,7 +55,7 @@ class Provider implements ProviderInterface {
         if (err) {
           reject(err);
         } else {
-          resolve(data.length > 0 ? data[0] : undefined);
+          resolve(Array.isArray(data) && data.length > 0 ? data[0] as ProviderInterface : undefined);
         }
       });
     });
@@ -86,7 +86,7 @@ class Provider implements ProviderInterface {
         if (err) {
           reject(err);
         }
-        resolve(data);
+        resolve(data as MessageRequest[]);
       });
     });
   }
