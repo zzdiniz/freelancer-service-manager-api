@@ -226,11 +226,10 @@ export default class ProviderController {
           }
         }
       });
-
       const retentionRate = (recurringClients.size / uniqueClients.size) * 100;
 
       const serviceFrequency: Record<number, number> = {};
-      finishedAppointments.forEach((appointment) => {
+      finishedAppointments.filter(appointment => services?.some(service => service.id === appointment.serviceId)).forEach((appointment) => {
         if (appointment.serviceId) {
           if (serviceFrequency[appointment.serviceId]) {
             serviceFrequency[appointment.serviceId]++;
